@@ -1,3 +1,15 @@
+# Check if the current PowerShell session is running as Administrator
+$currentUser = New-Object Security.Principal.WindowsPrincipal $([Security.Principal.WindowsIdentity]::GetCurrent())
+$isAdmin = $currentUser.IsInRole([Security.Principal.WindowsBuiltinRole]::Administrator)
+
+if (-not $isAdmin) {
+    # Relaunch PowerShell as Administrator
+    Start-Process powershell.exe -Verb RunAs -ArgumentList "-NoProfile -NoExit -File `"$($MyInvocation.MyCommand.Definition)`""
+    # Exit the current non-elevated session
+    exit
+}
+
+
 # First thing is to download and install a NerdFont. I use Agave
 
 $fontUrl = "https://github.com/ryanoasis/nerd-fonts/releases/download/v3.3.0/Agave.zip"
@@ -42,7 +54,8 @@ foreach ($font in $fonts) {
 Write-Output "Deleting windows' terminal's settings.json and replacing it with a symlink to the settings.json from our git repo."
 
 Remove-Item "$env:LOCALAPPDATA\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json"
-New-Item -ItemType SymbolicLink -Path "$env:LOCALAPPDATA\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json" -Target "C:\Users\odiguer\Documents\config.windows-terminal\settings.json"
+New-Item -ItemType SymbolicLink -Path "$env:LOCALAPPDATA\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json" -Target "$PSScriptRoot\settings.json"
 
+Read-Host
 
 
